@@ -3,10 +3,10 @@ const { Pool } = require("pg");
 const CONFIG = require("../config/config");
 
 module.exports = function(req, res, next) {
-  if (req.headers.token) {
-    jwt.verify(req.res.token, CONFIG.SECRET, (err, decoded) => {
+  if (req.body.token) {
+    jwt.verify(req.body.token, CONFIG.SECRET, (err, decoded) => {
       if (err) return res.send({ status: 401, message: "Unauthorized", err });
-      const pool = Pool(CONFIG.DB);
+      const pool = new Pool(CONFIG.DB);
 
       pool.query("SELECT 1+1 AS NUMBER", err => {
         if (err)
