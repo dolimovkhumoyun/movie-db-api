@@ -40,7 +40,6 @@ router.post("/", (req, res) => {
         return res.send({ status: 200, message: "Item has been added" });
       });
     } else if (result.rowCount === 0) {
-      console.log(add_fav_movie_query + add_fav_query);
       req.pgPool.query(add_fav_movie_query + add_fav_query, (err, res2) => {
         if (err) {
           req.pgPool.end();

@@ -36,16 +36,16 @@ router.post("/", (req, res) => {
       error: error.details[0].message
     });
 
-  const query = `SELECT email, name FROM users WHERE email = '${value.username}' AND password = '${value.password}' LIMIT 1`;
+  const query = `SELECT id, email, name FROM users WHERE email = '${value.username}' AND password = '${value.password}' LIMIT 1`;
 
   const pool = new Pool(CONFIG.DB);
   pool.query(query, (error, results) => {
     if (error) return res.send({ status: 500, message: "Internal error", error });
     if (results.rowCount > 0) {
-      const token = jwt.sign({ data: results }, CONFIG.SECRET, {
+      const token = jwt.sign({ data: results.rows }, CONFIG.SECRET, {
         expiresIn: parseInt(CONFIG.SESSION_TIMEOUT)
       });
-      return res.send({ status: 200, user: results.rows[0], token });
+      return res.send({ status: 200, token });
     }
     return res.send({ status: 404, message: "User not found" });
   });
@@ -55,7 +55,7 @@ router.post("/google", (req, res) => {
   const { error, value } = schemaGoogle.validate(req.body);
   if (error) return res.send({ status: 400, message: "Bad request", error: error.details[0].message });
 
-  const query = `SELECT email,name,img_url FROM users WHERE email = '${value.email}' LIMIT 1`;
+  const query = `SELECT id, email,name,img_url FROM users WHERE email = '${value.email}' LIMIT 1`;
   const insert_query = `INSERT INTO users(email, name, img_url) values ('${value.email}', '${value.name}', '${value.imageUrl}')`;
   const pool = new Pool(CONFIG.DB);
   pool.query(query, (error, results) => {
@@ -64,7 +64,7 @@ router.post("/google", (req, res) => {
       const token = jwt.sign({ data: results.rows[0] }, CONFIG.SECRET, {
         expiresIn: parseInt(CONFIG.SESSION_TIMEOUT)
       });
-      return res.send({ status: 200, user: results.rows[0], token });
+      return res.send({ status: 200, token });
     } else {
       pool.query(insert_query, (error, results) => {
         if (error) return res.send({ status: 500, message: "Internal error", error });
